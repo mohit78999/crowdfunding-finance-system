@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Payroll #' + ${payroll.payrollId}">Payroll Detail</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container-fluid mt-4">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="bi bi-bank"></i> Payroll #<span th:text="${payroll.payrollId}"></span></h1>
+        </div>
+        <div class="col text-end">
+            <a th:href="@{/payroll}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Payroll
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="bi bi-bank"></i> Payroll Details</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p><strong>Administrator:</strong> <span th:text="${payroll.administrator != null ? payroll.administrator.name : '—'}">—</span></p>
+                    <p><strong>Fundraiser:</strong>
+                        <a th:href="@{/fundraisers/{id}(id=${payroll.fundraiser != null ? payroll.fundraiser.fundraiserNo : 0})}"
+                           th:text="${payroll.fundraiser != null ? payroll.fundraiser.title : '—'}">—</a>
+                    </p>
+                    <p><strong>Transaction:</strong>
+                        <a th:href="@{/transactions/{id}(id=${payroll.transaction != null ? payroll.transaction.transactionId : 0})}">
+                            #<span th:text="${payroll.transaction != null ? payroll.transaction.transactionId : '—'}"></span>
+                        </a>
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Payout Type:</strong> <span class="badge bg-info text-dark" th:text="${payroll.payoutType}">Automatic</span></p>
+                    <p><strong>Payout Date:</strong> <span th:text="${payroll.payoutDate != null ? #temporals.format(payroll.payoutDate, 'yyyy-MM-dd HH:mm') : '—'}">—</span></p>
+                </div>
+            </div>
+            <hr>
+            <table class="table table-sm table-bordered">
+                <tbody>
+                    <tr>
+                        <td>Gross Transaction Amount</td>
+                        <td class="text-end fw-bold">&#8377;<span th:text="${payroll.transaction != null ? #numbers.formatDecimal(payroll.transaction.amount, 1, 'COMMA', 2, 'POINT') : '0.00'}"></span></td>
+                    </tr>
+                    <tr class="table-warning">
+                        <td>Platform Fee Deducted (1%)</td>
+                        <td class="text-end text-warning">- &#8377;<span th:text="${#numbers.formatDecimal(payroll.platformFeeDeducted, 1, 'COMMA', 2, 'POINT')}"></span></td>
+                    </tr>
+                    <tr class="table-success">
+                        <td class="fw-semibold">Admin Earnings (99%)</td>
+                        <td class="text-end fw-bold text-success">&#8377;<span th:text="${#numbers.formatDecimal(payroll.adminEarnings, 1, 'COMMA', 2, 'POINT')}"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="alert alert-success">
+                <span class="badge bg-success">&#9889; AUTO-GENERATED</span>
+                This payroll record was automatically created by <strong>PayrollFactory</strong> when the donation was processed.
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="mt-5 py-3 bg-light text-center">
+    <div class="container">
+        <p class="text-muted mb-0">Crowdfunding Database Management System &copy; 2026</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

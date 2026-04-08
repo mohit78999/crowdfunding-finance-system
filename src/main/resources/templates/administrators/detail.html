@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${administrator.name} + ' - Earnings'">Admin Earnings</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container-fluid mt-4">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="bi bi-currency-dollar"></i> Administrator Earnings</h1>
+            <p class="text-muted">
+                <span th:text="${administrator.name}"></span>
+                (<span th:text="${administrator.email}"></span>)
+            </p>
+        </div>
+        <div class="col text-end">
+            <a th:href="@{/administrators}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Administrators
+            </a>
+        </div>
+    </div>
+
+    <!-- 4 Stat Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card admin-card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Earnings Received</h6>
+                    <div class="stat-value text-success">
+                        &#8377;<span th:text="${#numbers.formatDecimal(administrator.totalEarnings != null ? administrator.totalEarnings : 0, 1, 'COMMA', 2, 'POINT')}"></span>
+                    </div>
+                    <small class="text-muted">99% of donations</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Fundraisers</h6>
+                    <div class="stat-value text-primary" th:text="${#lists.size(administrator.fundraisers)}">0</div>
+                    <small class="text-muted"
+                           th:text="${#lists.size(administrator.fundraisers.?[status == 'Active'])} + ' active'"></small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Funds Managed</h6>
+                    <div class="stat-value text-info">
+                        &#8377;<span th:text="${#numbers.formatDecimal(administrator.totalEarnings != null ? administrator.totalEarnings : 0, 1, 'COMMA', 2, 'POINT')}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Payouts</h6>
+                    <div class="stat-value text-warning" th:text="${#lists.size(payrollList)}">0</div>
+                    <small class="text-muted" th:text="${#lists.size(payrollList)} + ' transactions'"></small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Earnings Breakdown Alert -->
+    <div class="alert alert-info mb-4" th:if="${!#lists.isEmpty(payrollList)}">
+        <i class="bi bi-lightning-fill text-warning"></i>
+        <strong>Earnings Breakdown:</strong>
+        Admin receives 99% of donations
+        (&#8377;<span th:text="${#numbers.formatDecimal(administrator.totalEarnings != null ? administrator.totalEarnings : 0, 1, 'COMMA', 2, 'POINT')}"></span>)
+        | Platform collects 1%
+        (&#8377;<span th:text="${#numbers.formatDecimal(administrator.totalEarnings != null ? administrator.totalEarnings * 0.01010101 : 0, 1, 'COMMA', 2, 'POINT')}"></span>)
+    </div>
+
+    <!-- Payroll History -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="bi bi-lightning-fill"></i> Auto-Generated Payroll History</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Payroll ID</th>
+                            <th>Fundraiser</th>
+                            <th>Transaction ID</th>
+                            <th>Admin Earnings (99%)</th>
+                            <th>Platform Fee (1%)</th>
+                            <th>Payout Date</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(payrollList)}">
+                            <td colspan="7" class="text-center text-muted">No payroll records yet.</td>
+                        </tr>
+                        <tr th:each="p : ${payrollList}">
+                            <td th:text="${p.payrollId}"></td>
+                            <td th:text="${p.fundraiser != null ? p.fundraiser.title : '—'}"></td>
+                            <td>
+                                <a th:href="@{/transactions/{id}(id=${p.transaction.transactionId})}"
+                                   class="badge bg-info text-decoration-none"
+                                   th:text="'#' + ${p.transaction.transactionId}"></a>
+                            </td>
+                            <td class="text-success">
+                                <strong>&#8377;<span th:text="${#numbers.formatDecimal(p.adminEarnings, 1, 'COMMA', 2, 'POINT')}"></span></strong>
+                            </td>
+                            <td class="text-warning">
+                                &#8377;<span th:text="${#numbers.formatDecimal(p.platformFeeDeducted, 1, 'COMMA', 2, 'POINT')}"></span>
+                            </td>
+                            <td th:text="${p.payoutDate != null ? #temporals.format(p.payoutDate, 'yyyy-MM-dd HH:mm') : '—'}"></td>
+                            <td>
+                                <span class="badge bg-primary" th:text="${p.payoutType}">Automatic</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fundraisers Managed -->
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-megaphone"></i> Fundraisers Managed</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Title</th>
+                            <th>Goal</th>
+                            <th>Raised</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(administrator.fundraisers)}">
+                            <td colspan="5" class="text-center text-muted">No fundraisers assigned.</td>
+                        </tr>
+                        <tr th:each="f : ${administrator.fundraisers}">
+                            <td th:text="${f.fundraiserNo}"></td>
+                            <td>
+                                <a th:href="@{/fundraisers/{id}(id=${f.fundraiserNo})}" th:text="${f.title}"></a>
+                            </td>
+                            <td>&#8377;<span th:text="${#numbers.formatDecimal(f.goalAmount, 1, 'COMMA', 2, 'POINT')}"></span></td>
+                            <td>&#8377;<span th:text="${#numbers.formatDecimal(f.raisedAmount != null ? f.raisedAmount : 0, 1, 'COMMA', 2, 'POINT')}"></span></td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${f.status == 'Active'} ? 'bg-success' : (${f.status == 'Planned'} ? 'bg-info' : 'bg-dark')"
+                                      th:text="${f.status}">Status</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="mt-5 py-3 bg-light text-center">
+    <div class="container">
+        <p class="text-muted mb-0">Crowdfunding Database Management System &copy; 2026</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

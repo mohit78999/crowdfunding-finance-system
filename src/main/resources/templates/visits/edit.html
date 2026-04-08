@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Visit - Crowdfunding Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container-fluid mt-4">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="bi bi-pencil"></i> Edit Visit</h4>
+                </div>
+                <div class="card-body">
+
+                    <div class="mb-3">
+                        <p><strong>Donor:</strong> <span th:text="${visit.donor != null ? visit.donor.dname : '—'}"></span></p>
+                        <p><strong>Fundraiser:</strong> <span th:text="${visit.fundraiser != null ? visit.fundraiser.title : '—'}"></span></p>
+                        <p><strong>Visit Date:</strong> <span th:text="${visit.visitDate != null ? #temporals.format(visit.visitDate, 'yyyy-MM-dd HH:mm') : '—'}"></span></p>
+                    </div>
+                    <hr>
+
+                    <form th:action="@{/visits/edit/{id}(id=${visit.visitId})}" method="post">
+                        <div class="mb-3">
+                            <label for="duration" class="form-label">Duration (minutes)</label>
+                            <input type="number" class="form-control" id="duration" name="duration"
+                                   th:value="${visit.duration}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="interestLevel" class="form-label">Interest Level</label>
+                            <select class="form-control" id="interestLevel" name="interestLevel" required>
+                                <option value="Very High" th:selected="${visit.interestLevel == 'Very High'}">Very High</option>
+                                <option value="High" th:selected="${visit.interestLevel == 'High'}">High</option>
+                                <option value="Medium" th:selected="${visit.interestLevel == 'Medium'}">Medium</option>
+                                <option value="Low" th:selected="${visit.interestLevel == 'Low'}">Low</option>
+                            </select>
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a th:href="@{/visits}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-warning">Update Visit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="mt-5 py-3 bg-light text-center">
+    <div class="container">
+        <p class="text-muted mb-0">Crowdfunding Database Management System &copy; 2026</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

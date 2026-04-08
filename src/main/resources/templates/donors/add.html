@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Donor - Crowdfunding Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container-fluid mt-4">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card donor-card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Add Donor</h4>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/donors/add}" method="post">
+                        <div class="mb-3">
+                            <label for="dname" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="dname" name="dname" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="demail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="demail" name="demail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="dphone" class="form-label">Phone Number</label>
+                            <input type="text" class="form-control" id="dphone" name="dphone">
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a th:href="@{/donors}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Add Donor</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="mt-5 py-3 bg-light text-center">
+    <div class="container">
+        <p class="text-muted mb-0">Crowdfunding Database Management System &copy; 2026</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

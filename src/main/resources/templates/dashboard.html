@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Crowdfunding Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container-fluid mt-4">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="bi bi-speedometer2"></i> Dashboard</h1>
+        </div>
+    </div>
+
+    <!-- Stat Cards Row 1 -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Fundraisers</h6>
+                    <div class="stat-value" th:text="${totalFundraisers}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Active Fundraisers</h6>
+                    <div class="stat-value text-success" th:text="${activeFundraisers}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Donors</h6>
+                    <div class="stat-value text-info" th:text="${totalDonors}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Raised</h6>
+                    <div class="stat-value text-warning">
+                        &#8377;<span th:text="${#numbers.formatDecimal(totalRaised != null ? totalRaised : 0, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat Cards Row 2 -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Transactions</h6>
+                    <div class="stat-value" th:text="${totalTransactions}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Platform Revenue (1%)</h6>
+                    <div class="stat-value text-warning">
+                        &#8377;<span th:text="${#numbers.formatDecimal(totalPlatformFees != null ? totalPlatformFees : 0, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Visits</h6>
+                    <div class="stat-value text-primary" th:text="${totalVisits}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Goal Amount</h6>
+                    <div class="stat-value">&#8377;<span th:text="${#numbers.formatDecimal(totalGoalAmount != null ? totalGoalAmount : 0, 1, 'COMMA', 0, 'POINT')}"></span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Transactions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Donor</th>
+                                    <th>Fundraiser</th>
+                                    <th>Gross</th>
+                                    <th>Platform Fee</th>
+                                    <th>Net</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${#lists.isEmpty(recentTransactions)}">
+                                    <td colspan="5" class="text-center text-muted">No transactions yet.</td>
+                                </tr>
+                                <tr th:each="t : ${recentTransactions}">
+                                    <td th:text="${t.donor.dname}">—</td>
+                                    <td th:text="${t.fundraiser.title}">—</td>
+                                    <td>&#8377;<span th:text="${#numbers.formatDecimal(t.amount, 1, 'COMMA', 0, 'POINT')}"></span></td>
+                                    <td class="text-warning">&#8377;<span th:text="${#numbers.formatDecimal(t.platformFee, 1, 'COMMA', 0, 'POINT')}"></span></td>
+                                    <td class="text-success">&#8377;<span th:text="${#numbers.formatDecimal(t.netAmount, 1, 'COMMA', 0, 'POINT')}"></span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-trophy"></i> Top Fundraisers</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Progress</th>
+                                    <th>Raised</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${#lists.isEmpty(topFundraisers)}">
+                                    <td colspan="3" class="text-center text-muted">No fundraisers yet.</td>
+                                </tr>
+                                <tr th:each="f : ${topFundraisers}">
+                                    <td>
+                                        <a th:href="@{/fundraisers/{id}(id=${f.fundraiserNo})}"
+                                           th:text="${#strings.length(f.title) > 20 ? #strings.substring(f.title, 0, 20) + '...' : f.title}">—</a>
+                                    </td>
+                                    <td style="min-width: 100px;">
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar bg-success"
+                                                 th:style="'width: ' + (${f.goalAmount} > 0 ? ${#numbers.formatDecimal(f.raisedAmount / f.goalAmount * 100, 1, 0)} : 0) + '%'">
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-success">&#8377;<span th:text="${#numbers.formatDecimal(f.raisedAmount, 1, 'COMMA', 0, 'POINT')}"></span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="mt-5 py-3 bg-light text-center">
+    <div class="container">
+        <p class="text-muted mb-0">Crowdfunding Database Management System &copy; 2026</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

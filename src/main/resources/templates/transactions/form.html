@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Transaction - Crowdfunding Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container-fluid mt-4">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card transaction-card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Record Donation</h4>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/transactions/add}" method="post" id="donationForm">
+
+                        <div class="mb-3">
+                            <label for="donorId" class="form-label">Donor</label>
+                            <select class="form-control" id="donorId" name="donorId" required>
+                                <option value="">Select Donor</option>
+                                <option th:each="donor : ${donors}"
+                                        th:value="${donor.donorId}"
+                                        th:text="${donor.dname + ' (' + donor.demail + ')'}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="fundraiserNo" class="form-label">
+                                    Fundraiser
+                                    <i class="bi bi-info-circle" data-bs-toggle="tooltip"
+                                       title="Select an active fundraiser to donate to"></i>
+                                </label>
+                                <select class="form-control" id="fundraiserNo" name="fundraiserNo" required
+                                        onchange="updateFundraiserInfo()">
+                                    <option value="">Select Fundraiser</option>
+                                    <option th:each="f : ${fundraisers}"
+                                            th:value="${f.fundraiserNo}"
+                                            th:text="${f.title}"
+                                            th:attr="data-remaining=${f.remainingAmount},data-status='Active'">
+                                    </option>
+                                </select>
+                                <div id="fundraiser-info" class="mt-2"></div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="amount" class="form-label">Donation Amount (&#8377;)</label>
+                                <input type="number" step="0.01" class="form-control"
+                                       id="amount" name="amount" required
+                                       oninput="calculateCommission()">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="paymentMode" class="form-label">Payment Mode</label>
+                                <select class="form-control" id="paymentMode" name="paymentMode" required>
+                                    <option value="">-- Select --</option>
+                                    <option th:each="mode : ${paymentModes}"
+                                            th:value="${mode}" th:text="${mode}"></option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Platform Fee Breakdown Preview -->
+                        <div class="alert alert-info mb-3" id="commission-preview" style="display: none;">
+                            <h6 class="mb-2"><strong>&#128176; Donation Breakdown</strong></h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <small class="text-muted">You're donating:</small><br>
+                                    <strong class="text-primary">&#8377;<span id="gross-amount">0.00</span></strong>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted">Platform fee (1%):</small><br>
+                                    <strong class="text-warning">&#8377;<span id="commission-amount">0.00</span></strong>
+                                    <br><small class="text-muted">(Platform keeps)</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted">To fundraiser (99%):</small><br>
+                                    <strong class="text-success">&#8377;<span id="net-amount">0.00</span></strong>
+                                    <br><small class="text-muted">(Admin receives via payroll)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a th:href="@{/transactions}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Record Transaction</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="mt-5 py-3 bg-light text-center">
+    <div class="container">
+        <p class="text-muted mb-0">Crowdfunding Database Management System &copy; 2026</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function(el) { return new bootstrap.Tooltip(el); });
+    });
+
+    var selectedFundraiserRemaining = 0;
+
+    function updateFundraiserInfo() {
+        var select = document.getElementById('fundraiserNo');
+        var option = select.options[select.selectedIndex];
+        var infoDiv = document.getElementById('fundraiser-info');
+        if (option.value) {
+            selectedFundraiserRemaining = parseFloat(option.dataset.remaining) || 0;
+            infoDiv.innerHTML = '<div class="alert alert-success">&#10003; Active fundraiser. Remaining: &#8377;' + selectedFundraiserRemaining.toLocaleString() + '</div>';
+        } else {
+            infoDiv.innerHTML = '';
+            selectedFundraiserRemaining = 0;
+        }
+        calculateCommission();
+    }
+
+    function calculateCommission() {
+        var amount = parseFloat(document.getElementById('amount').value) || 0;
+        var commission = Math.round(amount * 0.01 * 100) / 100;
+        var netAmount  = Math.round((amount - commission) * 100) / 100;
+        if (amount > 0) {
+            document.getElementById('gross-amount').textContent     = amount.toFixed(2);
+            document.getElementById('commission-amount').textContent = commission.toFixed(2);
+            document.getElementById('net-amount').textContent        = netAmount.toFixed(2);
+            document.getElementById('commission-preview').style.display = 'block';
+        } else {
+            document.getElementById('commission-preview').style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>

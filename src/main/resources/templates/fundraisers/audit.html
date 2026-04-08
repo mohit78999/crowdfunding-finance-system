@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fundraiser Audit Trail - Crowdfunding Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container-fluid mt-4">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="bi bi-file-earmark-text"></i> Audit Trail</h1>
+            <p class="text-muted" th:text="${fundraiser.title}"></p>
+        </div>
+        <div class="col text-end">
+            <a th:href="@{/fundraisers/{id}(id=${fundraiser.fundraiserNo})}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Fundraiser
+            </a>
+        </div>
+    </div>
+
+    <!-- Complete Audit Trail: Transactions -->
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">&#128203; Complete Audit Trail — Transactions</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>ID</th>
+                            <th>Date/Time</th>
+                            <th>Amount</th>
+                            <th>Donor</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(transactions)}">
+                            <td colspan="6" class="text-center text-muted">No transaction records found</td>
+                        </tr>
+                        <tr th:each="t : ${transactions}">
+                            <td><span class="badge bg-success">&#128176; TRANSACTION</span></td>
+                            <td th:text="'#' + ${t.transactionId}"></td>
+                            <td th:text="${t.transactionDate != null ? #temporals.format(t.transactionDate, 'yyyy-MM-dd HH:mm:ss') : 'N/A'}"></td>
+                            <td>&#8377;<span th:text="${#numbers.formatDecimal(t.amount, 1, 'COMMA', 2, 'POINT')}"></span></td>
+                            <td th:text="${t.donor != null ? t.donor.dname : '—'}">—</td>
+                            <td><span class="badge bg-secondary">&#128274; IMMUTABLE</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Visit History -->
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">&#128065; Detailed Visit History</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Visit ID</th>
+                            <th>Donor</th>
+                            <th>Visit Date</th>
+                            <th>Duration</th>
+                            <th>Interest Level</th>
+                            <th>Visit Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(visits)}">
+                            <td colspan="6" class="text-center text-muted">No visits recorded yet</td>
+                        </tr>
+                        <tr th:each="v : ${visits}">
+                            <td th:text="'#' + ${v.visitId}"></td>
+                            <td>
+                                <a th:href="@{/donors/{id}(id=${v.donor != null ? v.donor.donorId : 0})}"
+                                   th:text="${v.donor != null ? v.donor.dname : '—'}">—</a>
+                            </td>
+                            <td th:text="${v.visitDate != null ? #temporals.format(v.visitDate, 'yyyy-MM-dd HH:mm') : '—'}">—</td>
+                            <td th:text="${v.duration != null ? v.duration + ' min' : '—'}">—</td>
+                            <td>
+                                <span th:if="${v.interestLevel == 'Very High'}" class="badge bg-danger">&#128308; Very High</span>
+                                <span th:if="${v.interestLevel == 'High'}" class="badge bg-warning">&#128992; High</span>
+                                <span th:if="${v.interestLevel == 'Medium'}" class="badge bg-info">&#128993; Medium</span>
+                                <span th:if="${v.interestLevel == 'Low' or (v.interestLevel != 'Very High' and v.interestLevel != 'High' and v.interestLevel != 'Medium')}" class="badge bg-secondary">&#9898; Low</span>
+                            </td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${v.visitType == 'Transaction'} ? 'bg-success' : 'bg-info'"
+                                      th:text="${v.visitType}">View</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="mt-5 py-3 bg-light text-center">
+    <div class="container">
+        <p class="text-muted mb-0">Crowdfunding Database Management System &copy; 2026</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

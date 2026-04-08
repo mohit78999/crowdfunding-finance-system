@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - Crowdfunding Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container-fluid mt-4">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="bi bi-graph-up-arrow"></i> Advanced Analytics Dashboard</h1>
+            <p class="text-muted">Database views for comprehensive reporting</p>
+        </div>
+    </div>
+
+    <!-- Active Fundraisers View -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">&#127919; Active Fundraisers (vw_active_fundraisers)</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Goal</th>
+                            <th>Raised</th>
+                            <th>Remaining</th>
+                            <th>Progress</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(activeFundraisers)}">
+                            <td colspan="7" class="text-center text-muted">No active fundraisers</td>
+                        </tr>
+                        <tr th:each="f : ${activeFundraisers}">
+                            <td th:text="${f.fundraiserNo}"></td>
+                            <td>
+                                <a th:href="@{/fundraisers/{id}(id=${f.fundraiserNo})}"
+                                   th:text="${#strings.length(f.title) > 30 ? #strings.substring(f.title, 0, 30) + '...' : f.title}">
+                                </a>
+                            </td>
+                            <td>&#8377;<span th:text="${#numbers.formatDecimal(f.goalAmount, 1, 'COMMA', 0, 'POINT')}"></span></td>
+                            <td class="text-success">&#8377;<span th:text="${#numbers.formatDecimal(f.raisedAmount, 1, 'COMMA', 0, 'POINT')}"></span></td>
+                            <td class="text-warning">&#8377;<span th:text="${#numbers.formatDecimal(f.remainingAmount, 1, 'COMMA', 0, 'POINT')}"></span></td>
+                            <td style="min-width: 120px;">
+                                <div class="progress">
+                                    <div class="progress-bar bg-success progress-bar-fill"
+                                         th:data-raised="${f.raisedAmount}"
+                                         th:data-goal="${f.goalAmount}"
+                                         style="width: 0%">0%</div>
+                                </div>
+                            </td>
+                            <td><span class="badge bg-success" th:text="${f.status}">Active</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Summary View -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">&#128176; Transaction Summary (vw_transaction_summary)</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Donor</th>
+                            <th>Fundraiser</th>
+                            <th>Gross</th>
+                            <th>Commission (1%)</th>
+                            <th>Net (99%)</th>
+                            <th>Payment</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(recentTransactions)}">
+                            <td colspan="8" class="text-center text-muted">No transactions</td>
+                        </tr>
+                        <tr th:each="t : ${recentTransactions}">
+                            <td>
+                                <a th:href="@{/transactions/{id}(id=${t.transactionId})}"
+                                   th:text="'#' + ${t.transactionId}"></a>
+                            </td>
+                            <td th:text="${t.donor != null ? t.donor.dname : '—'}">—</td>
+                            <td th:text="${t.fundraiser != null ? (#strings.length(t.fundraiser.title) > 25 ? #strings.substring(t.fundraiser.title, 0, 25) + '...' : t.fundraiser.title) : '—'}">—</td>
+                            <td>&#8377;<span th:text="${#numbers.formatDecimal(t.amount, 1, 'COMMA', 0, 'POINT')}"></span></td>
+                            <td class="text-warning">&#8377;<span th:text="${#numbers.formatDecimal(t.platformFee, 1, 'COMMA', 2, 'POINT')}"></span></td>
+                            <td class="text-success">&#8377;<span th:text="${#numbers.formatDecimal(t.netAmount, 1, 'COMMA', 2, 'POINT')}"></span></td>
+                            <td><span class="badge bg-info" th:text="${t.paymentMode}">—</span></td>
+                            <td th:text="${t.transactionDate != null ? #temporals.format(t.transactionDate, 'yyyy-MM-dd') : '—'}">—</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donor Engagement View -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">&#128101; Donor Engagement (vw_donor_engagement)</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Donor</th>
+                            <th>Email</th>
+                            <th>Total Donated</th>
+                            <th>Transactions</th>
+                            <th>Fundraisers Visited</th>
+                            <th>Total Visits</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(donors)}">
+                            <td colspan="6" class="text-center text-muted">No donor data</td>
+                        </tr>
+                        <tr th:each="d : ${donors}">
+                            <td><a th:href="@{/donors/{id}(id=${d.donorId})}" th:text="${d.dname}">—</a></td>
+                            <td th:text="${d.demail}">—</td>
+                            <td class="text-success">
+                                <strong>&#8377;<span th:text="${#numbers.formatDecimal(d.totalDonated, 1, 'COMMA', 2, 'POINT')}"></span></strong>
+                            </td>
+                            <td><span class="badge bg-success" th:text="${donorTransactionCount[d.donorId]}">0</span></td>
+                            <td><span class="badge bg-primary" th:text="${donorFundraisersVisited[d.donorId]}">0</span></td>
+                            <td><span class="badge bg-info" th:text="${donorVisitCount[d.donorId]}">0</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Administrator Dashboard View -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-white">
+            <h5 class="mb-0">&#128737;&#65039; Administrator Dashboard (vw_administrator_dashboard)</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Admin</th>
+                            <th>Email</th>
+                            <th>Total Commission</th>
+                            <th>Fundraisers</th>
+                            <th>Active</th>
+                            <th>Total Raised</th>
+                            <th>Transactions</th>
+                            <th>Payouts</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(administrators)}">
+                            <td colspan="8" class="text-center text-muted">No administrator data</td>
+                        </tr>
+                        <tr th:each="a : ${administrators}">
+                            <td th:text="${a.name}">—</td>
+                            <td th:text="${a.email}">—</td>
+                            <td class="text-success">
+                                <strong>&#8377;<span th:text="${#numbers.formatDecimal(a.totalEarnings, 1, 'COMMA', 2, 'POINT')}"></span></strong>
+                            </td>
+                            <td><span class="badge bg-primary" th:text="${#lists.size(a.fundraisers)}">0</span></td>
+                            <td><span class="badge bg-success" th:text="${adminActiveFundraisers[a.adminId]}">0</span></td>
+                            <td>&#8377;<span th:text="${#numbers.formatDecimal(a.totalEarnings, 1, 'COMMA', 0, 'POINT')}"></span></td>
+                            <td><span class="badge bg-info" th:text="${adminTransactionCount[a.adminId]}">0</span></td>
+                            <td><span class="badge bg-warning" th:text="${adminPayoutCount[a.adminId]}">0</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert alert-info">
+        <strong>&#8505;&#65039; About Database Views:</strong> These are pre-configured database views that provide
+        optimized queries for reporting and analytics. They automatically update when underlying data changes.
+    </div>
+</div>
+
+<footer class="mt-5 py-3 bg-light text-center">
+    <div class="container">
+        <p class="text-muted mb-0">Crowdfunding Database Management System &copy; 2026</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.querySelectorAll('.progress-bar-fill').forEach(function(bar) {
+        var raised = parseFloat(bar.getAttribute('data-raised')) || 0;
+        var goal = parseFloat(bar.getAttribute('data-goal')) || 1;
+        var pct = Math.min(Math.round((raised / goal) * 100), 100);
+        bar.style.width = pct + '%';
+        bar.textContent = pct + '%';
+    });
+</script>
+</body>
+</html>

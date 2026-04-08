@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Record Visit - Crowdfunding Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container-fluid mt-4">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Record Visit</h4>
+                </div>
+                <div class="card-body">
+
+                    <div class="alert alert-light border mb-3">
+                        <i class="bi bi-lightbulb text-warning"></i>
+                        Interest level is automatically computed by <strong>VisitService</strong>
+                        using the <strong>Strategy Pattern</strong> based on cumulative visit count.
+                    </div>
+
+                    <form th:action="@{/visits/add}" method="post">
+
+                        <div class="mb-3">
+                            <label for="donorId" class="form-label">Donor</label>
+                            <select class="form-control" id="donorId" name="donorId" required>
+                                <option value="">-- Select Donor --</option>
+                                <option th:each="donor : ${donors}"
+                                        th:value="${donor.donorId}"
+                                        th:text="${donor.dname}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="fundraiserNo" class="form-label">Fundraiser</label>
+                            <select class="form-control" id="fundraiserNo" name="fundraiserNo" required>
+                                <option value="">-- Select Fundraiser --</option>
+                                <option th:each="f : ${fundraisers}"
+                                        th:value="${f.fundraiserNo}"
+                                        th:text="${f.title}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="duration" class="form-label">Duration (minutes)</label>
+                                <input type="number" class="form-control" id="duration"
+                                       name="duration" min="0" placeholder="e.g. 5">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="visitType" class="form-label">Visit Type</label>
+                                <select class="form-control" id="visitType" name="visitType">
+                                    <option th:each="vt : ${visitTypes}"
+                                            th:value="${vt}" th:text="${vt}"></option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a th:href="@{/visits}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Record Visit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="mt-5 py-3 bg-light text-center">
+    <div class="container">
+        <p class="text-muted mb-0">Crowdfunding Database Management System &copy; 2026</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

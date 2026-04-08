@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Transaction #' + ${transaction.transactionId}">Transaction Detail</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container-fluid mt-4">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="bi bi-receipt"></i> Transaction #<span th:text="${transaction.transactionId}"></span></h1>
+        </div>
+        <div class="col text-end">
+            <a th:href="@{/transactions}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Transactions
+            </a>
+        </div>
+    </div>
+
+    <div class="card transaction-card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-receipt"></i> Transaction Details</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p><strong>Donor:</strong> <span th:text="${transaction.donor != null ? transaction.donor.dname : '—'}">—</span></p>
+                    <p><strong>Email:</strong> <span th:text="${transaction.donor != null ? transaction.donor.demail : '—'}">—</span></p>
+                    <p><strong>Fundraiser:</strong>
+                        <a th:href="@{/fundraisers/{id}(id=${transaction.fundraiser != null ? transaction.fundraiser.fundraiserNo : 0})}"
+                           th:text="${transaction.fundraiser != null ? transaction.fundraiser.title : '—'}">—</a>
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Payment Mode:</strong> <span class="badge bg-info" th:text="${transaction.paymentMode}">—</span></p>
+                    <p><strong>Date:</strong> <span th:text="${#temporals.format(transaction.transactionDate, 'yyyy-MM-dd HH:mm:ss')}">—</span></p>
+                    <p><strong>Status:</strong> <span class="badge bg-danger">&#128274; IMMUTABLE</span></p>
+                </div>
+            </div>
+
+            <hr>
+
+            <h6>&#128176; Fee Breakdown</h6>
+            <table class="table table-sm table-bordered">
+                <tbody>
+                    <tr>
+                        <td>Gross Donation Amount</td>
+                        <td class="text-end fw-bold">&#8377;<span th:text="${#numbers.formatDecimal(transaction.amount, 1, 'COMMA', 2, 'POINT')}"></span></td>
+                    </tr>
+                    <tr class="table-warning">
+                        <td>Platform Fee (1%)</td>
+                        <td class="text-end text-warning fw-semibold">- &#8377;<span th:text="${#numbers.formatDecimal(transaction.platformFee, 1, 'COMMA', 2, 'POINT')}"></span></td>
+                    </tr>
+                    <tr class="table-success">
+                        <td class="fw-semibold">Net Amount to Fundraiser (99%)</td>
+                        <td class="text-end fw-bold text-success">&#8377;<span th:text="${#numbers.formatDecimal(transaction.netAmount, 1, 'COMMA', 2, 'POINT')}"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="alert alert-info">
+                <strong>&#128274; Note:</strong> Transactions cannot be edited or deleted after processing for audit compliance.
+                A payroll entry was automatically generated for this transaction. <a th:href="@{/payroll}">View Payroll &rarr;</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="mt-5 py-3 bg-light text-center">
+    <div class="container">
+        <p class="text-muted mb-0">Crowdfunding Database Management System &copy; 2026</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

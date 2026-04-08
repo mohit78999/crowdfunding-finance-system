@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fundraisers - Crowdfunding Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container-fluid mt-4">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="bi bi-megaphone"></i> Fundraisers</h1>
+        </div>
+        <div class="col text-end">
+            <a th:href="@{/fundraisers/add}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Create Fundraiser
+            </a>
+        </div>
+    </div>
+
+    <div class="card fundraiser-card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Owner</th>
+                            <th>Goal</th>
+                            <th>Raised</th>
+                            <th>Remaining</th>
+                            <th>Progress</th>
+                            <th>Engagement</th>
+                            <th>Status</th>
+                            <th>Deadline</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(fundraisers)}">
+                            <td colspan="11" class="text-center text-muted">No fundraisers yet.</td>
+                        </tr>
+                        <tr th:each="f : ${fundraisers}">
+                            <td th:text="${f.fundraiserNo}"></td>
+                            <td>
+                                <a th:href="@{/fundraisers/{id}(id=${f.fundraiserNo})}" th:text="${f.title}"></a>
+                            </td>
+                            <td th:text="${f.fundraiserOwnerName != null ? f.fundraiserOwnerName : '—'}">—</td>
+                            <td>&#8377;<span th:text="${#numbers.formatDecimal(f.goalAmount, 1, 'COMMA', 0, 'POINT')}"></span></td>
+                            <td class="text-success">&#8377;<span th:text="${#numbers.formatDecimal(f.raisedAmount != null ? f.raisedAmount : 0, 1, 'COMMA', 0, 'POINT')}"></span></td>
+                            <td class="text-warning">&#8377;<span th:text="${#numbers.formatDecimal(f.remainingAmount, 1, 'COMMA', 0, 'POINT')}"></span></td>
+                            <td style="min-width:110px;">
+                                <div class="progress">
+                                    <div class="progress-bar bg-success progress-bar-fill"
+                                         role="progressbar"
+                                         th:attr="data-raised=${f.raisedAmount},data-goal=${f.goalAmount}"
+                                         style="width:0%">0%</div>
+                                </div>
+                            </td>
+                            <td>
+                                <small><i class="bi bi-eye"></i> <span th:text="${visitCounts[f.fundraiserNo]}">0</span> visits</small><br>
+                                <small><i class="bi bi-people"></i> <span th:text="${donorCounts[f.fundraiserNo]}">0</span> donors</small>
+                            </td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${f.status == 'Active'} ? 'bg-success' : (${f.status == 'Planned'} ? 'bg-info' : 'bg-dark')"
+                                      th:text="${f.status}">Status</span>
+                            </td>
+                            <td th:text="${f.deadline != null ? #temporals.format(f.deadline, 'yyyy-MM-dd') : '—'}">—</td>
+                            <td>
+                                <a th:href="@{/fundraisers/edit/{id}(id=${f.fundraiserNo})}" class="btn btn-sm btn-warning btn-action">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a th:href="@{/fundraisers/delete/{id}(id=${f.fundraiserNo})}"
+                                   class="btn btn-sm btn-danger"
+                                   onclick="return confirm('Delete this fundraiser?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="mt-5 py-3 bg-light text-center">
+    <div class="container">
+        <p class="text-muted mb-0">Crowdfunding Database Management System &copy; 2026</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.querySelectorAll('.progress-bar-fill').forEach(function(bar) {
+        var raised = parseFloat(bar.dataset.raised) || 0;
+        var goal   = parseFloat(bar.dataset.goal)   || 0;
+        var pct    = goal > 0 ? Math.min(100, Math.round(raised / goal * 100)) : 0;
+        bar.style.width = pct + '%';
+        bar.textContent = pct + '%';
+    });
+</script>
+</body>
+</html>

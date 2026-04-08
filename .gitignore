@@ -1,0 +1,18 @@
+# Maven build folder
+target/
+
+# Local tools / Maven zip
+.tools/
+
+# Claude / editor config
+.claude/
+
+# Logs
+*.log
+
+# Compiled files
+*.class
+
+# OS files
+.DS_Store
+Thumbs.db
