@@ -93,9 +93,10 @@ public class VisitController {
      */
     @PostMapping("/record-view")
     @ResponseBody
-    public String recordViewVisit(@RequestParam Long fundraiserNo) {
+    public String recordViewVisit(@RequestParam Long fundraiserNo,
+                                   @RequestParam(required = false, defaultValue = "0") Integer duration) {
         try {
-            visitService.recordAnonymousVisit(fundraiserNo);
+            visitService.recordAnonymousVisit(fundraiserNo, duration);
             return "ok";
         } catch (Exception e) {
             return "error";

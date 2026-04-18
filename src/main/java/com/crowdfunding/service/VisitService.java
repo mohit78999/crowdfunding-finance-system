@@ -103,7 +103,7 @@ public class VisitService {
      * Called when anyone opens a fundraiser detail page.
      */
     @Transactional
-    public Visit recordAnonymousVisit(Long fundraiserNo) {
+    public Visit recordAnonymousVisit(Long fundraiserNo, Integer duration) {
         Fundraiser fundraiser = fundraiserRepository.findById(fundraiserNo)
                 .orElseThrow(() -> new IllegalArgumentException("Fundraiser not found"));
 
@@ -122,7 +122,7 @@ public class VisitService {
         Visit visit = new Visit();
         visit.setDonor(guest);
         visit.setFundraiser(fundraiser);
-        visit.setDuration(0);
+        visit.setDuration(duration != null ? duration : 0);
         visit.setVisitType("View");
         visit.setInterestLevel(interestLevel);
         return visitRepository.save(visit);

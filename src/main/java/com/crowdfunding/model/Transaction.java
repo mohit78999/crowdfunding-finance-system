@@ -74,4 +74,44 @@ public class Transaction {
     protected void onCreate() {
         this.transactionDate = LocalDateTime.now();
     }
+
+    /**
+     * Design Pattern: Builder — provides a readable, step-by-step way to construct
+     * a Transaction object with multiple fields, avoiding long constructor calls.
+     *
+     * Used by TransactionService.processDonation() to build the Transaction before saving.
+     * This keeps object construction clean and explicit — each field is named at the call site.
+     */
+    public static class Builder {
+
+        private Donor donor;
+        private Fundraiser fundraiser;
+        private BigDecimal amount;
+        private BigDecimal platformFee;
+        private BigDecimal netAmount;
+        private String paymentMode;
+
+        // Each setter returns 'this' so calls can be chained fluently
+        public Builder donor(Donor donor)               { this.donor = donor;               return this; }
+        public Builder fundraiser(Fundraiser fundraiser){ this.fundraiser = fundraiser;       return this; }
+        public Builder amount(BigDecimal amount)        { this.amount = amount;               return this; }
+        public Builder platformFee(BigDecimal fee)      { this.platformFee = fee;             return this; }
+        public Builder netAmount(BigDecimal net)        { this.netAmount = net;               return this; }
+        public Builder paymentMode(String mode)         { this.paymentMode = mode;            return this; }
+
+        /**
+         * Assembles and returns the fully configured Transaction object.
+         * @PrePersist on Transaction auto-sets transactionDate when saved.
+         */
+        public Transaction build() {
+            Transaction t = new Transaction();
+            t.setDonor(donor);
+            t.setFundraiser(fundraiser);
+            t.setAmount(amount);
+            t.setPlatformFee(platformFee);
+            t.setNetAmount(netAmount);
+            t.setPaymentMode(paymentMode);
+            return t;
+        }
+    }
 }

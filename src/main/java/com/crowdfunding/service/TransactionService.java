@@ -107,14 +107,17 @@ public class TransactionService {
         BigDecimal netAmount = amount.multiply(new BigDecimal("0.99"))
                 .setScale(2, java.math.RoundingMode.HALF_UP);
 
-        // --- Step 3: Build and persist the Transaction record (DAO Pattern) ---
-        Transaction transaction = new Transaction();
-        transaction.setDonor(donor);
-        transaction.setFundraiser(fundraiser);
-        transaction.setAmount(amount);
-        transaction.setPlatformFee(platformFee);
-        transaction.setNetAmount(netAmount);
-        transaction.setPaymentMode(paymentMode);
+        // --- Step 3: Build and persist the Transaction record ---
+        // Design Pattern: Builder — uses Transaction.Builder to construct the object
+        // step-by-step instead of a long constructor call, making each field explicit.
+        Transaction transaction = new Transaction.Builder()
+                .donor(donor)
+                .fundraiser(fundraiser)
+                .amount(amount)
+                .platformFee(platformFee)
+                .netAmount(netAmount)
+                .paymentMode(paymentMode)
+                .build();
         Transaction savedTransaction = transactionRepository.save(transaction);
 
         // --- Step 4: Create Payroll record ---

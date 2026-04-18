@@ -161,7 +161,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
+<script th:inline="javascript">
     var bar = document.getElementById('detailBar');
     if (bar) {
         var raised = parseFloat(bar.dataset.raised) || 0;
@@ -171,12 +171,16 @@
         bar.textContent = pct + '%';
     }
 
-    // Silent anonymous visit recording — fires immediately on page open
+    // Silent anonymous visit recording with duration tracking
     var fundraiserId = /*[[${fundraiser.fundraiserNo}]]*/ 0;
-    fetch('/visits/record-view', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'fundraiserNo=' + fundraiserId
+    var visitStart = Date.now();
+
+    // When user leaves the page, calculate duration in seconds and send the visit
+    window.addEventListener('beforeunload', function () {
+        var durationSeconds = Math.round((Date.now() - visitStart) / 1000);
+        navigator.sendBeacon('/visits/record-view',
+            new URLSearchParams({ fundraiserNo: fundraiserId, duration: durationSeconds })
+        );
     });
 </script>
 </body>
